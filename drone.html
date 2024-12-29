@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DroneHub - Mission Planner</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="drone.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h1>Mission Planner</h1>
+            <div class="control-buttons">
+                <button id="clear-points" class="control-btn">
+                    <i class="fas fa-trash"></i> Clear Points
+                </button>
+                <button id="export-csv" class="control-btn">
+                    <i class="fas fa-file-export"></i> Export CSV
+                </button>
+                <button id="start-mission" class="control-btn primary">
+                    <i class="fas fa-play"></i> Start Mission
+                </button>
+            </div>
+        </nav>
+        
+        <div class="main-content">
+            <div id="map"></div>
+            <div class="info-panel">
+                <div class="point-count">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Selected Points: </span>
+                    <span id="points-count">0</span>
+                </div>
+                <div class="points-list">
+                    <h3>Waypoints</h3>
+                    <div id="waypoints-container"></div>
+                </div>
+                <div class="mission-info">
+                    <div class="info-item">
+                        <i class="fas fa-route"></i>
+                        <span>Total Distance: </span>
+                        <span id="total-distance">0 km</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Est. Duration: </span>
+                        <span id="est-duration">0 min</span>
+                    </div>
+                </div>
+            </div>
+            <button id="weather-toggle" class="weather-toggle">
+                <i class="fas fa-cloud"></i>
+                Weather Info
+            </button>
+            <div class="weather-panel">
+                <div class="weather-header">
+                    <h3>Location Weather</h3>
+                    <button class="close-weather">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="weather-info">
+                    <div class="weather-item">
+                        <i class="fas fa-temperature-high"></i>
+                        <span>Temperature:</span>
+                        <span id="temperature">--°C</span>
+                    </div>
+                    <div class="weather-item">
+                        <i class="fas fa-wind"></i>
+                        <span>Wind Speed:</span>
+                        <span id="wind-speed">-- km/h</span>
+                    </div>
+                    <div class="weather-item">
+                        <i class="fas fa-tint"></i>
+                        <span>Humidity:</span>
+                        <span id="humidity">--%</span>
+                    </div>
+                    <div class="weather-item">
+                        <i class="fas fa-cloud"></i>
+                        <span>Conditions:</span>
+                        <span id="conditions">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="zoom-info" class="zoom-info" style="display: none;">
+            <i class="fas fa-map-marker-alt"></i>
+            <span id="total-points">0</span> Waypoints
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script type="module" src="drone.js"></script>
+</body>
+</html> 

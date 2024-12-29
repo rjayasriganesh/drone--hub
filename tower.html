@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DroneHub - Tower Control</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="tower.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-left">
+                <button class="back-btn" onclick="window.location.href='drone.html'">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <label class="upload-btn">
+                    <i class="fas fa-upload"></i> Upload CSV
+                    <input type="file" id="csv-upload" accept=".csv" hidden>
+                </label>
+            </div>
+            <h1>Tower Control</h1>
+            <div class="mission-status">
+                <span id="status-indicator"></span>
+                <span id="status-text">Ready</span>
+            </div>
+        </nav>
+        
+        <div class="main-content">
+            <div id="map"></div>
+            <div class="control-panel">
+                <div class="mission-info">
+                    <h3>Mission Details</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-route"></i>
+                            <span>Total Distance:</span>
+                            <span id="total-distance">0 km</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Est. Duration:</span>
+                            <span id="est-duration">0 min</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Waypoints:</span>
+                            <span id="waypoint-count">0</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Current Speed:</span>
+                            <span id="current-speed">0 km/h</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-panel">
+                    <div class="progress-bar">
+                        <div id="mission-progress" class="progress"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span>Mission Progress</span>
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                </div>
+
+                <div class="drone-status">
+                    <h3>Drone Status</h3>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <i class="fas fa-battery-three-quarters"></i>
+                            <span>Battery:</span>
+                            <span id="battery-level">100%</span>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-signal"></i>
+                            <span>Signal:</span>
+                            <span id="signal-strength">Strong</span>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-altitude"></i>
+                            <span>Altitude:</span>
+                            <span id="current-altitude">0 m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-buttons">
+                    <button id="start-mission" class="control-btn primary">
+                        <i class="fas fa-play"></i> Start Mission
+                    </button>
+                    <button id="pause-mission" class="control-btn" disabled>
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button id="abort-mission" class="control-btn danger" disabled>
+                        <i class="fas fa-stop"></i> Abort
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script type="module" src="tower.js"></script>
+</body>
+</html> 

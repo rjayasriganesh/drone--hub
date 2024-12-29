@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>DroneHub - Intelligent Drone Management</title>
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-drone"></i>
+                DroneHub
+            </div>
+            <div class="search-container">
+                <button id="live-location" class="live-btn">
+                    <i class="fas fa-location-arrow"></i> Live
+                </button>
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           id="location-search" 
+                           placeholder="Search for a location..."
+                           autocomplete="off">
+                    <button class="clear-search">×</button>
+                </div>
+                <div class="search-suggestions"></div>
+            </div>
+            <div class="nav-links">
+                <a href="drone.html">Drone</a>
+                <a href="tower.html">Tower</a>
+            </div>
+        </nav>
+        <div id="map-container">
+            <div id="cesiumContainer"></div>
+            <div id="leafletMap" style="display: none;"></div>
+            <div class="search-suggestions" style="display: none;"></div>
+            <div class="location-info" style="display: none;">
+                <h3>Selected Location</h3>
+                <p id="location-address"></p>
+                <button id="proceed-btn" class="proceed-btn">
+                    <i class="fas fa-arrow-right"></i> Proceed to Drone
+                </button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="main.js"></script>
+</body>
+</html> 

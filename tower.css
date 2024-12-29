@@ -1,0 +1,361 @@
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #3b82f6;
+    --accent-color: #60a5fa;
+    --background-color: #f8fafc;
+    --text-color: #1e293b;
+    --navbar-color: #1e293b;
+    --danger-color: #ef4444;
+    --success-color: #22c55e;
+    --warning-color: #f59e0b;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+.container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background: var(--navbar-color);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.back-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: #475569;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.mission-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--success-color);
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    position: relative;
+}
+
+#map {
+    flex: 1;
+    height: 100%;
+}
+
+.control-panel {
+    width: 400px;
+    background: white;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.mission-info h3, .drone-status h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.info-grid, .status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.info-item, .status-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+
+.info-item i, .status-item i {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.progress-panel {
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress {
+    height: 100%;
+    background: var(--primary-color);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.control-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.control-btn.primary {
+    background: var(--primary-color);
+}
+
+.control-btn.danger {
+    background: var(--danger-color);
+}
+
+.control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Drone marker styles */
+.drone-marker {
+    width: 40px;
+    height: 40px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 50%;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white;
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+}
+
+.drone-marker i {
+    transform: rotate(0deg);
+    transition: transform 0.3s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.active-waypoint {
+    animation: pulse 1s infinite;
+    background: var(--success-color) !important;
+}
+
+.nav-left {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.upload-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.upload-btn input[type="file"] {
+    display: none;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    z-index: 2000;
+    animation: fadeInOut 3s ease-in-out;
+}
+
+.notification.info {
+    background: var(--primary-color);
+}
+
+.notification.error {
+    background: var(--danger-color);
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; transform: translate(-50%, -20px); }
+    10%, 90% { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.drone-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: hover 2s ease-in-out infinite;
+}
+
+.drone-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    transform-origin: center;
+    transition: transform 0.3s ease;
+}
+
+@keyframes hover {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.confirmation-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.dialog-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    max-width: 400px;
+    width: 90%;
+}
+
+.dialog-content h3 {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.dialog-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.dialog-buttons button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.confirm-btn {
+    background: var(--primary-color);
+    color: white;
+}
+
+.cancel-btn {
+    background: #e2e8f0;
+    color: var(--text-color);
+}
+
+.waypoint-marker.preview {
+    background: var(--accent-color);
+    opacity: 0.8;
+}
+
+.waypoint-summary {
+    list-style: none;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.waypoint-summary li {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.waypoint-summary li:last-child {
+    margin-bottom: 0;
+}
+
+.waypoint-summary li::before {
+    content: '•';
+    color: var(--primary-color);
+} 

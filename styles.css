@@ -1,0 +1,465 @@
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #3b82f6;
+    --accent-color: #60a5fa;
+    --background-color: #f8fafc;
+    --text-color: #1e293b;
+    --navbar-color: #1e293b;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+.container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--background-color);
+    transition: opacity 0.5s ease;
+}
+
+.navbar {
+    background: var(--navbar-color);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 600px;
+    width: 100%;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+#location-search {
+    width: 100%;
+    padding: 12px 40px 12px 45px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+#location-search:focus {
+    background: rgba(255,255,255,0.15);
+    outline: none;
+}
+
+.live-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.live-btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.live-btn:disabled {
+    background: var(--text-secondary);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.fa-spin {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.location-info {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    max-width: 400px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    transform-origin: bottom;
+}
+
+.location-info h3 {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.location-info p {
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+
+.proceed-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.proceed-btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: #4CAF50;
+}
+
+#cesiumContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.5s ease;
+}
+
+.cesium-viewer {
+    width: 100%;
+    height: 100%;
+}
+
+.cesium-widget-credits {
+    display: none !important;
+}
+
+.loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4CAF50;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.suggestions-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1001;
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:hover {
+    background: #f5f5f5;
+}
+
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    z-index: 1000;
+    animation: fadeInOut 3s ease-in-out;
+    font-size: 14px;
+    max-width: 80%;
+    text-align: center;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
+
+#map-container {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 64px); /* Subtract navbar height */
+    overflow: hidden;
+}
+
+#cesiumContainer,
+#leafletMap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.5s ease;
+}
+
+.search-container {
+    position: relative;
+}
+
+.clear-search {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;
+    display: none;
+}
+
+.clear-search:hover {
+    color: white;
+}
+
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.suggestion-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.suggestion-item:hover {
+    background-color: #f8fafc;
+}
+
+.suggestion-content {
+    flex: 1;
+}
+
+.suggestion-name {
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.suggestion-details {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+#cesiumContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: black;
+}
+
+.cesium-widget-credits {
+    display: none !important;
+}
+
+.cesium-viewer-toolbar,
+.cesium-viewer-animationContainer,
+.cesium-viewer-timelineContainer {
+    display: none !important;
+}
+
+#leafletMap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: #f5f5f5;
+}
+
+.leaflet-control-container {
+    z-index: 1000;
+}
+
+/* Location marker and pulse animation */
+.location-marker {
+    position: relative;
+}
+
+.pulse {
+    width: 20px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    position: relative;
+    animation: pulse 1.5s infinite;
+}
+
+.pulse:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--primary-color);
+    opacity: 0.3;
+    animation: pulse-ring 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+    }
+    50% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.95);
+    }
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+/* Improve notification styling */
+.notification {
+    background: rgba(0, 0, 0, 0.9);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    max-width: 80%;
+    text-align: center;
+}
+
+.suggestion-icon {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.suggestion-item:hover {
+    background-color: #f8fafc;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.location-info.show {
+    transform: translateY(0);
+    opacity: 1;
+} 
