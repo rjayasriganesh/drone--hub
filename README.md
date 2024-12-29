@@ -61,22 +61,22 @@ DroneHub is a web-based drone mission planning and control system that provides 
   - CSV import/export
 
 ## 📦 Project Structure 
--drone-hub/
--├── assets/
--│ └── images/
--│ ├── drone.png
--│ └── waypoint-marker.png
--├── styles/
--│ └── theme.css
--├── index.html
--├── drone.html
--├── tower.html
--├── main.js
--├── drone.js
--├── tower.js
--├── weather.js
--├── auth.js
--├── config.js
--├── styles.css
--├── drone.css
--└── tower.css
+drone-hub/
+├── assets/
+│   └── images/
+│       ├── drone.png
+│       └── waypoint-marker.png
+├── styles/
+│   └── theme.css
+├── index.html
+├── drone.html
+├── tower.html
+├── main.js
+├── drone.js
+├── tower.js
+├── weather.js
+├── auth.js
+├── config.js
+├── styles.css
+├── drone.css
+└── tower.css
