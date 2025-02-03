@@ -462,4 +462,45 @@
 .location-info.show {
     transform: translateY(0);
     opacity: 1;
-} 
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-btn {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.nav-btn.active {
+    background: var(--primary-color);
+}
+
+#logout-btn {
+    background: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#logout-btn:hover {
+    background: var(--secondary-dark);
+}
+
+#admin-map {
+    width: 100%;
+    height: 500px;
+}

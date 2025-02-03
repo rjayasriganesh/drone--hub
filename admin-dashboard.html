@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowFly - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="admin-dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-drone"></i>
+                ShadowFly
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" id="live-location-btn">
+                    <i class="fas fa-location-dot"></i> Live Location
+                </button>
+                <button class="nav-btn" onclick="window.location.href='index.html'" data-tooltip="Back to Home">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button class="nav-btn" id="logout-btn" data-tooltip="Logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
+        
+        <div class="loading-overlay" id="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+        
+        <div class="dashboard-content">
+            <div class="sidebar">
+                <div class="ddt-controls">
+                    <div class="section-header">
+                        <h3>DDT Management</h3>
+                    </div>
+                    <button class="control-btn" id="add-warehouse-btn" data-tooltip="Add new warehouse">
+                        <i class="fas fa-warehouse"></i> Add Warehouse
+                    </button>
+                    <button class="control-btn" id="add-ddt-btn" data-tooltip="Add new DDT location">
+                        <i class="fas fa-plus"></i> Add DDT
+                    </button>
+                    <div class="file-upload">
+                        <input type="file" id="csv-upload" accept=".csv" hidden>
+                        <button class="control-btn" id="upload-csv-btn">
+                            <i class="fas fa-file-upload"></i> Upload CSV
+                        </button>
+                    </div>
+                    <button class="control-btn" id="save-changes-btn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button id="ddt-info-btn" class="info-btn">
+                        <i class="fas fa-info-circle"></i> DDT Info
+                    </button>
+                </div>
+                
+                <div class="sidebar-content">
+                    <div class="warehouse-section">
+                        <div class="section-header">
+                            <h3>Warehouses</h3>
+                        </div>
+                        <div class="warehouse-list" id="warehouse-list">
+                            <!-- Warehouses will be added here dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="ddt-section">
+                        <div class="section-header">
+                            <h3>DDTs</h3>
+                        </div>
+                        <div class="ddt-list" id="ddt-list">
+                            <!-- DDTs will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="drone-section">
+                    <button class="drone-btn" onclick="window.location.href='drone.html'">
+                        <i class="fas fa-drone"></i>
+                        <span>Manage Drones</span>
+                    </button>
+                </div>
+                
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search DDTs..." id="ddt-search">
+                </div>
+            </div>
+            <div class="map-container">
+                <div id="admin-map"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="admin-dashboard.js"></script>
+</body>
+</html> 
