@@ -1,428 +1,525 @@
-import config from './config.js';
-
-// Get selected location from session storage
-const selectedLocation = JSON.parse(sessionStorage.getItem('selectedLocation'));
-
-// Initialize map with satellite layer
-const map = L.map('map').setView(
-    selectedLocation ? [selectedLocation.lat, selectedLocation.lon] : [0, 0],
-    selectedLocation ? 15 : 2
-);
-
-// Add satellite layer
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-}).addTo(map);
-
-// Store waypoints and markers
-let waypoints = [];
-let markers = [];
-
-// Add this constant at the top of the file
-const MAX_DISTANCE = 200; // Maximum distance in kilometers
-
-// Custom marker icon with number
-function createNumberedIcon(number) {
-    return L.divIcon({
-        className: 'waypoint-marker',
-        html: `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${number}</div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14]
-    });
+// Check authentication
+function checkAuth() {
+    const userRole = sessionStorage.getItem('userRole');
+    if (!userRole || userRole !== 'admin') {
+        window.location.href = 'login.html';
+        return;
+    }
 }
 
-// Add click handler to map
-map.on('click', (e) => {
-    // Calculate potential new total distance before adding waypoint
-    const potentialWaypoint = {
-        lat: e.latlng.lat,
-        lng: e.latlng.lng
-    };
+//checkAuth();
+
+// Ensure the map container exists and is styled
+document.addEventListener('DOMContentLoaded', function() {
+    const mapContainer = document.getElementById('drone-map');
+    if (!mapContainer) {
+        const container = document.createElement('div');
+        container.id = 'drone-map';
+        container.style.width = '100%';
+        container.style.height = '500px';
+        document.body.appendChild(container);
+    }
+    checkSelectedWarehouse();
+    loadActiveDrones();
+});
+
+// Initialize map with Hybrid Layer from Google Maps
+const map = L.map('drone-map').setView([0, 0], 2);
+
+const hybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '© Google Hybrid'
+});
+
+hybridLayer.addTo(map);
+
     
-    const potentialDistance = calculatePotentialDistance(potentialWaypoint);
+// Drone management
+let drones = [];
+let selectedDrone = null;
+let selectedWarehouse = null;
+
+// Add warehouse selection functionality
+document.getElementById('select-warehouse-btn').addEventListener('click', () => {
+    window.location.href = 'warehouse-selection.html';
+});
+
+// Add function to check for selected warehouse on page load
+function checkSelectedWarehouse() {
+    const selectedWarehouse = JSON.parse(localStorage.getItem('selectedWarehouse'));
+    if (selectedWarehouse) {
+        selectWarehouse(selectedWarehouse);
+    }
+}
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    checkSelectedWarehouse();
+});
+
+function showWarehouseSelector() {
+    // Fetch warehouses from localStorage
+    const warehouses = JSON.parse(localStorage.getItem('warehouses') || '[]');
     
-    if (potentialDistance > MAX_DISTANCE) {
-        showDistanceWarning(potentialDistance);
+    if (warehouses.length === 0) {
+        alert('No warehouses available. Please add warehouses in the admin dashboard first.');
         return;
     }
 
-    const number = waypoints.length + 1;
-    const marker = L.marker(e.latlng, {
-        icon: createNumberedIcon(number),
-        draggable: true
-    }).addTo(map);
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay';
+    document.body.appendChild(overlay);
     
-    // Handle marker drag with distance check
-    marker.on('dragend', () => {
-        const position = marker.getLatLng();
-        const originalPosition = { lat: waypoints[number - 1].lat, lng: waypoints[number - 1].lng };
-        
-        // Calculate potential distance with new position
-        waypoints[number - 1].lat = position.lat;
-        waypoints[number - 1].lng = position.lng;
-        const newTotalDistance = calculateTotalDistance();
-        
-        if (newTotalDistance > MAX_DISTANCE) {
-            // Revert the position if it exceeds limit
-            waypoints[number - 1].lat = originalPosition.lat;
-            waypoints[number - 1].lng = originalPosition.lng;
-            marker.setLatLng([originalPosition.lat, originalPosition.lng]);
-            showDistanceWarning(newTotalDistance);
-        } else {
-            updateWaypointsList();
-            updatePath();
-            updateMissionInfo();
+    const popup = document.createElement('div');
+    popup.className = 'warehouse-selector-popup';
+    popup.innerHTML = `
+        <h3>Select Warehouse</h3>
+        <div class="warehouse-list">
+            ${warehouses.map(w => `
+                <div class="warehouse-option ${selectedWarehouse?.id === w.id ? 'selected' : ''}" 
+                     data-warehouse-id="${w.id}">
+                    <i class="fas fa-warehouse"></i>
+                    <div class="warehouse-details">
+                        <span class="warehouse-name">${w.name}</span>
+                        <span class="warehouse-location">Lat: ${w.lat.toFixed(4)}, Lng: ${w.lng.toFixed(4)}</span>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        <div class="warehouse-selector-actions">
+            <button class="confirm-btn">Confirm</button>
+            <button class="cancel-btn">Cancel</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    // Add click handlers for warehouse options
+    const options = popup.querySelectorAll('.warehouse-option');
+    options.forEach(option => {
+        option.addEventListener('click', () => {
+            options.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+        });
+    });
+
+    // Add button handlers
+    const confirmBtn = popup.querySelector('.confirm-btn');
+    confirmBtn.addEventListener('click', () => {
+        const selectedOption = popup.querySelector('.warehouse-option.selected');
+        if (selectedOption) {
+            const warehouseId = selectedOption.dataset.warehouseId;
+            const warehouse = warehouses.find(w => w.id == warehouseId);
+            selectWarehouse(warehouse);
         }
+        closeWarehouseSelector();
     });
+
+    popup.querySelector('.cancel-btn').addEventListener('click', closeWarehouseSelector);
+    overlay.addEventListener('click', closeWarehouseSelector);
+}
+
+function closeWarehouseSelector() {
+    const overlay = document.querySelector('.popup-overlay');
+    const popup = document.querySelector('.warehouse-selector-popup');
+    if (overlay) overlay.remove();
+    if (popup) popup.remove();
+}
+
+function selectWarehouse(warehouse) {
+    selectedWarehouse = warehouse;
+    document.getElementById('add-drone-btn').disabled = false;
     
-    waypoints.push({
-        number,
-        lat: e.latlng.lat,
-        lng: e.latlng.lng,
-        marker
-    });
+    // Zoom to warehouse location
+    map.setView([warehouse.lat, warehouse.lng], 16);
     
-    markers.push(marker);
-    updateWaypointsList();
-    updatePath();
-    updateMissionInfo();
+    // Update warehouse selection display
+    const warehouseDisplay = document.createElement('div');
+    warehouseDisplay.className = 'selected-warehouse';
+    warehouseDisplay.innerHTML = `
+        <div class="warehouse-info">
+            <i class="fas fa-warehouse"></i>
+            <span>${warehouse.name}</span>
+        </div>
+        <button class="change-warehouse-btn" onclick="showWarehouseSelector()">
+            Change
+        </button>
+    `;
+    
+    // Replace or add the warehouse display
+    const existingDisplay = document.querySelector('.selected-warehouse');
+    if (existingDisplay) {
+        existingDisplay.replaceWith(warehouseDisplay);
+    } else {
+        document.getElementById('select-warehouse-btn').insertAdjacentElement('afterend', warehouseDisplay);
+    }
+    
+    // Hide the select warehouse button
+    document.getElementById('select-warehouse-btn').style.display = 'none';
+}
+
+// Add drone handler
+document.getElementById('add-drone-btn').addEventListener('click', () => {
+    if (!selectedWarehouse) {
+        alert('Please select a warehouse first');
+        return;
+    }
+    window.location.href = 'drone-assignment.html';
 });
 
-// Handle zoom events for overview mode
-map.on('zoomend', () => {
-    const zoomLevel = map.getZoom();
-    const zoomInfo = document.getElementById('zoom-info');
+// Update drone list
+function updateDroneList() {
+    const list = document.getElementById('drone-list');
+    list.innerHTML = '<h3>Available Drones</h3>';
     
-    if (zoomLevel < 10 && waypoints.length > 0) {
-        zoomInfo.style.display = 'flex';
-        document.getElementById('total-points').textContent = waypoints.length;
-    } else {
-        zoomInfo.style.display = 'none';
-    }
-});
-
-// Draw path between waypoints
-let pathLine;
-function updatePath() {
-    if (pathLine) {
-        map.removeLayer(pathLine);
-    }
-    
-    if (waypoints.length > 1) {
-        const coordinates = waypoints.map(wp => [wp.lat, wp.lng]);
-        pathLine = L.polyline(coordinates, {
-            color: '#2563eb',
-            weight: 3,
-            opacity: 0.8,
-            dashArray: '10, 10'
-        }).addTo(map);
+    drones.forEach(drone => {
+        const item = document.createElement('div');
+        item.className = `drone-item ${selectedDrone === drone ? 'selected' : ''} ${drone.active ? '' : 'drone-inactive'}`;
+        item.innerHTML = `
+            <div class="drone-info">
+                <strong>${drone.name}</strong>
+                <div class="drone-status">Status: ${drone.status}</div>
+                <div class="drone-battery">Battery: ${drone.battery}%</div>
+                <div class="drone-package">Package: ${drone.package || 'Not assigned'}</div>
+            </div>
+            <div class="drone-actions">
+                <button class="action-btn package-btn" onclick="showPackageSelector(${drone.id})" title="Select Package">
+                    <i class="fas fa-box"></i>
+                </button>
+                <button class="action-btn toggle-btn" onclick="toggleDrone(${drone.id})" title="${drone.active ? 'Disable' : 'Enable'} Drone">
+                    <i class="fas fa-${drone.active ? 'eye' : 'eye-slash'}"></i>
+                </button>
+                <button class="action-btn delete-btn" onclick="deleteDrone(${drone.id})" title="Delete Drone">
+                    <i class="fas fa-trash"></i>
+            </button>
+            </div>
+        `;
         
-        // Update zoom info if needed
-        const zoomLevel = map.getZoom();
-        const zoomInfo = document.getElementById('zoom-info');
-        if (zoomLevel < 10) {
-            zoomInfo.style.display = 'flex';
-            document.getElementById('total-points').textContent = waypoints.length;
-        }
+        item.addEventListener('click', (e) => {
+            if (!e.target.closest('.drone-actions')) {
+                selectDrone(drone);
+            }
+        });
+        list.appendChild(item);
+    });
+}
+
+// Select drone
+function selectDrone(drone) {
+    selectedDrone = drone;
+    updateDroneList();
+    updateMissionDetails();
+}
+
+// Update mission details
+function updateMissionDetails() {
+    const details = document.getElementById('mission-details');
+    if (selectedDrone) {
+        details.innerHTML = `
+            <div class="mission-info">
+                <p><strong>Selected Drone:</strong> ${selectedDrone.name}</p>
+                <p><strong>Status:</strong> ${selectedDrone.status}</p>
+                <p><strong>Battery:</strong> ${selectedDrone.battery}%</p>
+                <p><strong>Position:</strong> ${selectedDrone.position.lat.toFixed(6)}, ${selectedDrone.position.lng.toFixed(6)}</p>
+            </div>
+        `;
     } else {
-        document.getElementById('zoom-info').style.display = 'none';
+        details.innerHTML = '<p>No drone selected</p>';
     }
 }
 
-// Update waypoints list in sidebar
-function updateWaypointsList() {
-    const container = document.getElementById('waypoints-container');
-    container.innerHTML = '';
+// Mission control handlers
+document.getElementById('start-mission-btn').addEventListener('click', () => {
+    if (selectedDrone) {
+        selectedDrone.status = 'active';
+        updateDroneList();
+        updateMissionDetails();
+    } else {
+        alert('Please select a drone first');
+    }
+});
+
+document.getElementById('stop-mission-btn').addEventListener('click', () => {
+    if (selectedDrone) {
+        selectedDrone.status = 'idle';
+        updateDroneList();
+        updateMissionDetails();
+    } else {
+        alert('Please select a drone first');
+    }
+});
+
+// Add package selector functionality
+function showPackageSelector(droneId) {
+    const drone = drones.find(d => d.id === droneId);
     
-    let runningDistance = 0;
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay';
+    document.body.appendChild(overlay);
     
-    waypoints.forEach((wp, index) => {
-        // Calculate running distance
-        if (index > 0) {
-            runningDistance += map.distance(
-                [waypoints[index-1].lat, waypoints[index-1].lng],
-                [wp.lat, wp.lng]
-            ) / 1000;
-        }
-        
-        const item = document.createElement('div');
-        item.className = 'waypoint-item';
-        
-        // Add warning class if this waypoint causes distance to exceed limit
-        if (runningDistance > MAX_DISTANCE) {
-            item.classList.add('distance-warning');
-        }
-        
-        item.innerHTML = `
-            <div class="number">${wp.number}</div>
-            <div class="coordinates">
-                ${wp.lat.toFixed(6)}, ${wp.lng.toFixed(6)}
-                ${runningDistance > MAX_DISTANCE ? 
-                    `<div class="distance-warning-text">Exceeds ${MAX_DISTANCE}km limit</div>` 
-                    : ''}
+    const popup = document.createElement('div');
+    popup.className = 'package-popup';
+    popup.innerHTML = `
+        <h3>Select Package</h3>
+        <div class="package-options">
+            <div class="package-option ${drone.package === '1' ? 'selected' : ''}" data-package="1">
+                <i class="fas fa-box"></i> Package 1
             </div>
-            <button class="delete-waypoint" data-index="${index}">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        container.appendChild(item);
-    });
+            <div class="package-option ${drone.package === '2' ? 'selected' : ''}" data-package="2">
+                <i class="fas fa-box"></i> Package 2
+            </div>
+            <div class="package-option ${drone.package === '3' ? 'selected' : ''}" data-package="3">
+                <i class="fas fa-box"></i> Package 3
+            </div>
+            <div class="package-option ${drone.package === '4' ? 'selected' : ''}" data-package="4">
+                <i class="fas fa-box"></i> Package 4
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
     
-    // Add delete button handlers
-    document.querySelectorAll('.delete-waypoint').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const index = parseInt(e.currentTarget.dataset.index);
-            deleteWaypoint(index);
+    const options = popup.querySelectorAll('.package-option');
+    options.forEach(option => {
+        option.addEventListener('click', () => {
+            const packageNumber = option.dataset.package;
+            updateDronePackage(droneId, packageNumber);
+            closePackageSelector();
         });
     });
     
-    document.getElementById('points-count').textContent = waypoints.length;
+    overlay.addEventListener('click', closePackageSelector);
 }
 
-// Delete waypoint function
-function deleteWaypoint(index) {
-    // Remove the marker from the map
-    map.removeLayer(waypoints[index].marker);
-    
-    // Remove the waypoint from the array
-    waypoints.splice(index, 1);
-    
-    // Renumber remaining waypoints
-    waypoints.forEach((wp, i) => {
-        wp.number = i + 1;
-        // Update marker icon with new number
-        wp.marker.setIcon(createNumberedIcon(i + 1));
-    });
-    
-    // Update the path
-    updatePath();
-    
-    // Update the list
-    updateWaypointsList();
-    
-    // Update mission info
-    updateMissionInfo();
+function closePackageSelector() {
+    const overlay = document.querySelector('.popup-overlay');
+    const popup = document.querySelector('.package-popup');
+    if (overlay) overlay.remove();
+    if (popup) popup.remove();
 }
 
-// Calculate mission info
-function updateMissionInfo() {
-    const totalDistance = calculateTotalDistance();
-    const estimatedDuration = calculateEstimatedDuration(totalDistance);
-    
-    document.getElementById('total-distance').textContent = `${totalDistance.toFixed(2)} km`;
-    document.getElementById('est-duration').textContent = `${estimatedDuration} min`;
-}
-
-function calculateTotalDistance() {
-    if (waypoints.length < 2) return 0;
-    
-    let distance = 0;
-    for (let i = 1; i < waypoints.length; i++) {
-        distance += map.distance(
-            [waypoints[i-1].lat, waypoints[i-1].lng],
-            [waypoints[i].lat, waypoints[i].lng]
-        );
+function updateDronePackage(droneId, packageNumber) {
+    const drone = drones.find(d => d.id === droneId);
+    if (drone) {
+        drone.package = packageNumber;
+        updateDroneList();
     }
-    return distance / 1000; // Convert to kilometers
 }
 
-function calculateEstimatedDuration(distance) {
-    const averageSpeed = 40; // km/h
-    return Math.ceil((distance / averageSpeed) * 60); // Convert to minutes
-}
-
-// Clear points handler
-document.getElementById('clear-points').addEventListener('click', () => {
-    if (waypoints.length === 0) return;
-    
-    if (confirm('Are you sure you want to clear all waypoints?')) {
-        waypoints.forEach(wp => map.removeLayer(wp.marker));
-        if (pathLine) map.removeLayer(pathLine);
-        waypoints = [];
-        markers = [];
-        updateWaypointsList();
-        updateMissionInfo();
+// Add toggle drone functionality
+function toggleDrone(droneId) {
+    const drone = drones.find(d => d.id === droneId);
+    if (drone) {
+        drone.active = !drone.active;
+        updateDroneList();
+        // Update drone marker on map
+        updateDroneMarker(drone);
+        // Save changes to localStorage
+        saveDronesToStorage();
     }
-});
+}
 
-// Export CSV handler
-document.getElementById('export-csv').addEventListener('click', () => {
-    if (waypoints.length === 0) {
-        alert('No waypoints to export');
+// Add function to update drone marker
+function updateDroneMarker(drone) {
+    if (drone.marker) {
+        drone.marker.setOpacity(drone.active ? 1 : 0.5);
+    } else {
+        // Create marker if it doesn't exist
+        drone.marker = L.marker([drone.position.lat, drone.position.lng], {
+            opacity: drone.active ? 1 : 0.5,
+            icon: L.divIcon({
+                className: 'drone-marker',
+                html: `
+                    <div class="drone-point ${drone.active ? '' : 'inactive'}">
+                        <i class="fas fa-drone"></i>
+                    </div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            })
+        }).addTo(map);
+
+        // Add popup for drone
+        drone.marker.bindPopup(`
+            <div class="drone-popup">
+                <h4>${drone.name}</h4>
+                <p>Status: ${drone.status}</p>
+                <p>Battery: ${drone.battery}%</p>
+            </div>
+        `);
+    }
+}
+
+// Add function to save drones to localStorage
+function saveDronesToStorage() {
+    localStorage.setItem('activeDrones', JSON.stringify(drones));
+}
+
+// Add drone info functionality
+document.getElementById('drone-info-btn').addEventListener('click', () => {
+    if (!selectedDrone) {
+        alert('Please select a drone first');
         return;
     }
     
-    const csv = [
-        'Number,Latitude,Longitude',
-        ...waypoints.map(wp => `${wp.number},${wp.lat},${wp.lng}`)
-    ].join('\n');
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'mission_waypoints.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    showDroneInfo(selectedDrone);
 });
 
-// Start mission handler
-document.getElementById('start-mission').addEventListener('click', () => {
-    if (waypoints.length < 2) {
-        alert('Please add at least 2 waypoints before starting the mission');
-        return;
-    }
+function showDroneInfo(drone) {
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay';
+    document.body.appendChild(overlay);
     
-    // Store mission data
-    sessionStorage.setItem('missionWaypoints', JSON.stringify(
-        waypoints.map(wp => ({
-            number: wp.number,
-            latitude: wp.lat,
-            longitude: wp.lng
-        }))
-    ));
+    const popup = document.createElement('div');
+    popup.className = 'drone-info-popup';
+    popup.innerHTML = `
+        <h3>Drone Information</h3>
+        <div class="drone-info-content">
+            <div class="info-item">
+                <strong>Name:</strong> ${drone.name}
+            </div>
+            <div class="info-item">
+                <strong>Status:</strong> ${drone.status}
+            </div>
+            <div class="info-item">
+                <strong>Battery:</strong> ${drone.battery}%
+            </div>
+            <div class="info-item">
+                <strong>Package:</strong> ${drone.package || 'Not assigned'}
+            </div>
+            <div class="info-item">
+                <strong>Position:</strong> ${drone.position.lat.toFixed(6)}, ${drone.position.lng.toFixed(6)}
+            </div>
+            <div class="info-item">
+                <strong>Active:</strong> ${drone.active ? 'Yes' : 'No'}
+            </div>
+        </div>
+        <button class="close-info-btn">Close</button>
+    `;
+    document.body.appendChild(popup);
     
-    // Store mission info
-    sessionStorage.setItem('missionInfo', JSON.stringify({
-        totalDistance: calculateTotalDistance(),
-        estimatedDuration: calculateEstimatedDuration(calculateTotalDistance())
-    }));
-    
-    // Redirect to tower control
-    window.location.href = 'tower.html';
-});
-
-// Add these new helper functions
-function calculatePotentialDistance(newPoint) {
-    if (waypoints.length === 0) return 0;
-    
-    // Create a temporary array with the new point
-    const tempWaypoints = [...waypoints, { lat: newPoint.lat, lng: newPoint.lng }];
-    
-    let distance = 0;
-    for (let i = 1; i < tempWaypoints.length; i++) {
-        distance += map.distance(
-            [tempWaypoints[i-1].lat, tempWaypoints[i-1].lng],
-            [tempWaypoints[i].lat, tempWaypoints[i].lng]
-        );
-    }
-    return distance / 1000; // Convert to kilometers
-}
-
-function showDistanceWarning(distance) {
-    const warningMessage = `Warning: Total route distance (${distance.toFixed(2)} km) would exceed the maximum limit of ${MAX_DISTANCE} km`;
-    
-    // Create and show warning notification
-    const notification = document.createElement('div');
-    notification.className = 'notification warning';
-    notification.textContent = warningMessage;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
-}
-
-// Add this function to fetch weather data
-async function fetchWeatherData(lat, lon) {
-    try {
-        const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${config.OPENWEATHER_API_KEY}`
-        );
-        if (!response.ok) throw new Error('Weather data fetch failed');
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error fetching weather:', error);
-        return null;
-    }
-}
-
-// Add these functions for weather toggle
-function setupWeatherToggle() {
-    const weatherToggle = document.getElementById('weather-toggle');
-    const weatherPanel = document.querySelector('.weather-panel');
-    const closeWeather = document.querySelector('.close-weather');
-
-    weatherToggle.addEventListener('click', () => {
-        weatherPanel.classList.add('show');
-        weatherToggle.style.opacity = '0';
-        weatherToggle.style.pointerEvents = 'none';
+    const closeBtn = popup.querySelector('.close-info-btn');
+    closeBtn.addEventListener('click', () => {
+        overlay.remove();
+        popup.remove();
     });
-
-    closeWeather.addEventListener('click', () => {
-        weatherPanel.classList.remove('show');
-        weatherToggle.style.opacity = '1';
-        weatherToggle.style.pointerEvents = 'all';
+    
+    overlay.addEventListener('click', () => {
+        overlay.remove();
+        popup.remove();
     });
 }
 
-// Update the updateWeatherPanel function
-function updateWeatherPanel(weatherData) {
-    if (!weatherData) return;
+// Initialize the page
+updateDroneList();
+updateMissionDetails();
 
-    const weatherPanel = document.querySelector('.weather-panel');
-    
-    document.getElementById('temperature').textContent = `${Math.round(weatherData.main.temp)}°C`;
-    document.getElementById('wind-speed').textContent = `${Math.round(weatherData.wind.speed * 3.6)} km/h`;
-    document.getElementById('humidity').textContent = `${weatherData.main.humidity}%`;
-    document.getElementById('conditions').textContent = weatherData.weather[0].main;
+// After map initialization, add these variables
+let ddts = [];
+let warehouses = [];
 
-    // Initialize weather toggle functionality
-    setupWeatherToggle();
+// Add function to load DDTs and warehouses
+function loadSavedLocations() {
+    // Load DDTs
+    const savedDDTs = localStorage.getItem('ddts');
+    if (savedDDTs) {
+        ddts = JSON.parse(savedDDTs);
+        ddts.forEach(ddt => addDDTToMap(ddt));
+    }
+
+    // Load warehouses
+    const savedWarehouses = localStorage.getItem('warehouses');
+    if (savedWarehouses) {
+        warehouses = JSON.parse(savedWarehouses);
+        warehouses.forEach(warehouse => addWarehouseToMap(warehouse));
+    }
 }
 
-// Update the DOMContentLoaded event handler
-document.addEventListener('DOMContentLoaded', () => {
-    const container = document.querySelector('.container');
-    container.style.opacity = '0';
-    
-    // Initialize map with fade in
-    setTimeout(() => {
-        container.style.opacity = '1';
-        
-        // If coming from main page with a selected location
-        if (selectedLocation) {
-            // Add marker for selected location with animation
-            setTimeout(async () => {
-                const locationMarker = L.marker([selectedLocation.lat, selectedLocation.lon], {
+// Add function to display DDTs on map
+function addDDTToMap(ddt) {
+    const marker = L.marker([ddt.lat, ddt.lng], {
+        icon: L.divIcon({
+            className: 'ddt-marker',
+            html: `
+                <div class="ddt-point">
+                    <span class="ddt-number">${ddt.name.split(' ')[1]}</span>
+                </div>
+            `,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        })
+    });
+
+    marker.bindPopup(`
+        <div class="ddt-popup">
+            <h4>${ddt.name}</h4>
+            <p>Rack: ${ddt.rack || 'Not assigned'}</p>
+            <p>Status: ${ddt.active ? 'Active' : 'Inactive'}</p>
+        </div>
+    `);
+
+    marker.addTo(map);
+}
+
+// Add function to display warehouses on map
+function addWarehouseToMap(warehouse) {
+    const currentZoom = map.getZoom();
+    const marker = L.marker([warehouse.lat, warehouse.lng], {
                     icon: L.divIcon({
-                        className: 'selected-location-marker',
-                        html: '<div class="location-point"></div>',
-                        iconSize: [16, 16],
-                        iconAnchor: [8, 8]
-                    })
-                }).addTo(map);
+            className: 'warehouse-marker',
+            html: currentZoom >= WAREHOUSE_VISIBILITY_ZOOM ? `
+                <div class="warehouse-point">
+                    <i class="fas fa-warehouse"></i>
+                    <span class="warehouse-name">${warehouse.name}</span>
+                </div>
+            ` : `<div class="warehouse-point-minimal"></div>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        })
+    });
 
-                // Add accuracy circle with animation
-                const circle = L.circle([selectedLocation.lat, selectedLocation.lon], {
-                    radius: selectedLocation.accuracy || 100,
-                    color: '#2563eb',
-                    fillColor: '#2563eb',
-                    fillOpacity: 0,
-                    weight: 1
-                }).addTo(map);
+    marker.bindPopup(`
+        <div class="warehouse-popup">
+            <h4>${warehouse.name}</h4>
+        </div>
+    `);
 
-                setTimeout(() => {
-                    circle.setStyle({ fillOpacity: 0.1 });
-                }, 300);
+    marker.addTo(map);
+}
 
-                // Add tooltip with animation
-                if (selectedLocation.address) {
-                    setTimeout(() => {
-                        locationMarker.bindTooltip(selectedLocation.address, {
-                            permanent: false,
-                            direction: 'top'
-                        }).openTooltip();
-                    }, 1000);
-                }
-
-                // Fetch and display weather data
-                const weatherData = await fetchWeatherData(selectedLocation.lat, selectedLocation.lon);
-                updateWeatherPanel(weatherData);
-            }, 500);
+// Add zoom handler for warehouse visibility
+const WAREHOUSE_VISIBILITY_ZOOM = 13;
+map.on('zoomend', () => {
+    const currentZoom = map.getZoom();
+    document.querySelectorAll('.warehouse-marker').forEach(marker => {
+        const warehouse = warehouses.find(w => 
+            w.lat === marker._latlng.lat && 
+            w.lng === marker._latlng.lng
+        );
+        if (warehouse) {
+            marker.innerHTML = currentZoom >= WAREHOUSE_VISIBILITY_ZOOM ? `
+                <div class="warehouse-point">
+                    <i class="fas fa-warehouse"></i>
+                    <span class="warehouse-name">${warehouse.name}</span>
+                </div>
+            ` : `<div class="warehouse-point-minimal"></div>`;
         }
-    }, 100);
-}); 
+    });
+});
+
+// Load saved locations
+loadSavedLocations();
+
+// Add these styles to drone.css 
+
+// Load active drones from localStorage
+function loadActiveDrones() {
+    const activeDrones = JSON.parse(localStorage.getItem('activeDrones') || '[]');
+    drones = activeDrones;
+    // Create markers for all drones
+    drones.forEach(drone => {
+        updateDroneMarker(drone);
+    });
+    updateDroneList();
+}
+
+// Call loadActiveDrones when initializing the page
+loadActiveDrones();

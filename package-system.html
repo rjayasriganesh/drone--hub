@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowFly - Package System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="package-system.css">
+</head>
+<body>
+    <div class="package-system">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-box"></i>
+                Package System Configuration
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn save-btn" onclick="saveAndReturn()">
+                    <i class="fas fa-save"></i> Save & Return
+                </button>
+                <button class="nav-btn cancel-btn" onclick="window.location.href='drone-assignment.html'">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="main-container">
+                <div class="info-card">
+                    <div class="drone-info">
+                        <!-- Drone info will be displayed here -->
+                    </div>
+                    <div class="warehouse-info">
+                        <!-- Warehouse info will be displayed here -->
+                    </div>
+                </div>
+
+                <div class="packages-container">
+                    <div class="package-section">
+                        <h3>Package 1</h3>
+                        <div class="package-card" data-package="1">
+                            <div class="package-status">
+                                <button class="toggle-btn">
+                                    <i class="fas fa-power-off"></i>
+                                    <span>Activate</span>
+                                </button>
+                            </div>
+                            <div class="ddt-selection hidden">
+                                <h4>Select DDT</h4>
+                                <div class="ddt-list">
+                                    <!-- DDTs will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="package-section">
+                        <h3>Package 2</h3>
+                        <div class="package-card" data-package="2">
+                            <div class="package-status">
+                                <button class="toggle-btn">
+                                    <i class="fas fa-power-off"></i>
+                                    <span>Activate</span>
+                                </button>
+                            </div>
+                            <div class="ddt-selection hidden">
+                                <h4>Select DDT</h4>
+                                <div class="ddt-list">
+                                    <!-- DDTs will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="package-section">
+                        <h3>Package 3</h3>
+                        <div class="package-card" data-package="3">
+                            <div class="package-status">
+                                <button class="toggle-btn">
+                                    <i class="fas fa-power-off"></i>
+                                    <span>Activate</span>
+                                </button>
+                            </div>
+                            <div class="ddt-selection hidden">
+                                <h4>Select DDT</h4>
+                                <div class="ddt-list">
+                                    <!-- DDTs will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="package-system.js"></script>
+</body>
+</html> 

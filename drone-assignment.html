@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowFly - Drone Assignment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="drone-assignment.css">
+</head>
+<body>
+    <div class="drone-assignment">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-drone"></i>
+                ShadowFly - Drone Assignment
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="saveDronesAndReturn()">
+                    <i class="fas fa-save"></i> Save & Return
+                </button>
+                <button class="nav-btn" onclick="window.location.href='drone.html'">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="selected-warehouse">
+                <!-- Selected warehouse info will be displayed here -->
+            </div>
+            <div class="drone-grid" id="drone-grid">
+                <!-- Drones will be populated here -->
+            </div>
+        </div>
+    </div>
+    <script src="drone-assignment.js"></script>
+</body>
+</html> 

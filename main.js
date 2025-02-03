@@ -597,4 +597,28 @@ document.getElementById('proceed-btn').addEventListener('click', () => {
     setTimeout(() => {
         window.location.href = 'drone.html';
     }, 500);
+});
+
+function checkAuth() {
+    const userRole = sessionStorage.getItem('userRole');
+    if (!userRole) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    // Show/hide admin button based on role
+    const adminButton = document.querySelector('.admin-only');
+    if (adminButton) {
+        adminButton.style.display = userRole === 'admin' ? 'block' : 'none';
+    }
+}
+
+// Call this when the page loads
+checkAuth();
+
+// Add logout handler
+document.getElementById('logout-btn').addEventListener('click', () => {
+    sessionStorage.removeItem('userRole');
+    sessionStorage.removeItem('username');
+    window.location.href = 'login.html';
 }); 

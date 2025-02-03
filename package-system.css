@@ -1,0 +1,234 @@
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #3b82f6;
+    --background-color: #f8fafc;
+    --text-color: #1e293b;
+    --navbar-color: #1e293b;
+    --success-color: #22c55e;
+    --warning-color: #f97316;
+    --danger-color: #ef4444;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+.package-system {
+    min-height: 100vh;
+    background: var(--background-color);
+}
+
+.navbar {
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--navbar-color);
+    color: white;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-btn {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.save-btn {
+    background: var(--success-color);
+}
+
+.cancel-btn {
+    background: var(--danger-color);
+}
+
+.content {
+    padding: 2rem;
+}
+
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.info-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+}
+
+.drone-info, .warehouse-info {
+    flex: 1;
+}
+
+.packages-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.package-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.package-section h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.package-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.package-status {
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.toggle-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    background: #e2e8f0;
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn.active {
+    background: var(--success-color);
+    color: white;
+}
+
+.ddt-selection {
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.ddt-selection h4 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ddt-selection h4:before {
+    content: '\f4d7';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: var(--primary-color);
+}
+
+.ddt-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.ddt-item {
+    padding: 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ddt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.ddt-header h4 {
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+.distance-badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.ddt-details {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.ddt-info {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.ddt-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.ddt-info i {
+    color: var(--primary-color);
+}
+
+.ddt-item:hover {
+    border-color: var(--primary-color);
+    background: #f0f7ff;
+    transform: translateY(-2px);
+}
+
+.ddt-item.selected {
+    border-color: var(--primary-color);
+    background: #f0f7ff;
+    border-width: 2px;
+}
+
+.text-success {
+    color: var(--success-color);
+}
+
+.text-danger {
+    color: var(--danger-color);
+} 

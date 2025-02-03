@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <title>DroneHub - Intelligent Drone Management</title>
+    <title>ShadowFly - Intelligent Drone Management</title>
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -19,7 +19,7 @@
         <nav class="navbar">
             <div class="logo">
                 <i class="fas fa-drone"></i>
-                DroneHub
+                ShadowFly
             </div>
             <div class="search-container">
                 <button id="live-location" class="live-btn">
@@ -35,9 +35,15 @@
                 </div>
                 <div class="search-suggestions"></div>
             </div>
-            <div class="nav-links">
-                <a href="drone.html">Drone</a>
-                <a href="tower.html">Tower</a>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="window.location.href='drone.html'">Drone</button>
+                <button class="nav-btn" onclick="window.location.href='tower.html'">Tower</button>
+                <button class="nav-btn admin-only" onclick="window.location.href='admin-dashboard.html'" style="display: none;">
+                    <i class="fas fa-cog"></i> Admin
+                </button>
+                <button class="nav-btn" id="logout-btn" data-tooltip="Logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
         </nav>
         <div id="map-container">

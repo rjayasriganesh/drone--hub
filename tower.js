@@ -4,11 +4,28 @@ import config from './config.js';
 const missionWaypoints = JSON.parse(sessionStorage.getItem('missionWaypoints'));
 const missionInfo = JSON.parse(sessionStorage.getItem('missionInfo'));
 
-// Initialize map
-const map = L.map('map').setView([0, 0], 2);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri'
-}).addTo(map);
+// Ensure the map container exists and is styled
+document.addEventListener('DOMContentLoaded', function() {
+    const mapContainer = document.getElementById('admin-map');
+    if (!mapContainer) {
+        const container = document.createElement('div');
+        container.id = 'admin-map';
+        container.style.width = '100%';
+        container.style.height = '500px';
+        document.body.appendChild(container);
+    }
+    initializeMission();
+});
+
+// Initialize map with Hybrid Layer
+const map = L.map('admin-map').setView([0, 0], 2);
+
+const hybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '© Google Hybrid'
+});
+
+hybridLayer.addTo(map);
 
 let droneMarker;
 let currentPath;
@@ -520,4 +537,33 @@ map.on('zoomend', () => {
             layer.setIcon(createWaypointIcon(number));
         }
     });
-}); 
+});
+
+// Add rack button handler
+document.getElementById('rack-mission').addEventListener('click', () => {
+    // Store current mission state if needed
+    const missionState = {
+        waypoints: missionWaypoints,
+        currentIndex: currentWaypointIndex,
+        progress: document.getElementById('mission-progress').style.width
+    };
+    sessionStorage.setItem('missionState', JSON.stringify(missionState));
+    
+    // Navigate to rack selection page
+    window.location.href = 'rack.html';
+});
+
+// Check for selected rack when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    const selectedRack = sessionStorage.getItem('selectedRack');
+    if (selectedRack) {
+        // Update UI to show selected rack
+        const rackButton = document.getElementById('rack-mission');
+        rackButton.innerHTML = `
+            <i class="fas fa-layer-group"></i> Rack ${selectedRack}
+        `;
+        rackButton.classList.add('selected');
+        // Clear the selection from session storage
+        sessionStorage.removeItem('selectedRack');
+    }
+});
